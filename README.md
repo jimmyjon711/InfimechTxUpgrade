@@ -1,19 +1,23 @@
 # Updating Infimech TX 3D Printer from Klipper 10 to Klipper 12
 
+Guide/script still a work in progress but its good enough to upgrade to klipper 12. My end goal is to figure out what services are not needed(yes I think there are some) and remove the un-necessary clutter in the MKS user folder.
 
-
-## Disclamer
-## **<span style="color:red">Preform this at your own risk, I am not resonsible if something happens while running this script. Making a backup is highly recommended.</span>**  
-
-This script does not update the STM32 microcontroller to klipper 12, once I figure this out(should be straight fowards) I will update this guide. 
+# Disclaimer
+## **<span style="color:red">Preform this at your own risk, I am not responsible  if something happens while running this script. Making a backup is highly recommended.</span>**    
 
 ## What does this script do
 - Runs through backing up config files and restoring them once klipper and moonraker is removed then reinstalled
 - Saves current printer history including runtime
 - You should not see a difference once this script is done running
 - Webcamd and touch screen still work like normal
+- Recompiles RPI mcu
+- Fixes sources.list fist so that you can update(only to what is in the archive area) and apply security patches.
+    - Future work to compile Armbian 24 and get this working corectly.... TBD
 
-## Prerequisites
+## What this script does not do
+- Script/guide does not update the STM32 microcontroller to klipper 12, once I figure this out (should be straight forwards ) I will update this guide
+
+# Prerequisites
 The following steps are for backing up and moving to a bigger eMMC module.
 - Acquire an **eMMC to USB Adapter**: [MKS USB3 Adapter - AliExpress](https://www.aliexpress.com/item/1005005614719377.html) or [Adapter with spare eMMC - AliExpress](https://www.aliexpress.com/item/1005005998925775.html)  
  or  
@@ -65,10 +69,10 @@ Linux
 
 2) Once connected login using: User: `mks`. Password: `makerbase`. 
 
-## Download and run script
+# Download and run script
 1. Pull script
     ```
-    wget......
+     wget https://raw.githubusercontent.com/jimmyjon711/InfimexTxUpgrade/main/infimechTxUpgrade.sh && chmod +x ./infimechTxUpgrade.sh
     ```
 1. Run script 
     ```
@@ -76,15 +80,20 @@ Linux
     ```
 1. Either run all with `a` or choose each step in order from `1-7`
 1. See sections with prompted with input
+1. Once done reboot
+    ```
+    sudo reboot
+    ```
+1. Perform optional steps if everything is working
 
-## Updating armbian:
+### - Updating armbian:
 1. Choose `Y` to update `N` to continue without updates
 
-## Timezone Configuration:
+### - Timezone Configuration:
 1. Navigate to : `Personal` > `Timezone` to set your zone.
 1. Exit
 
-## Running Kiauh:
+### -  Running Kiauh:
 1. Hit `Y` to update and relaunch.
 1. Choose `Y` if Kiauh updated
 1. Enable automatic backups before updates (optional)
@@ -116,10 +125,14 @@ Linux
         - Type (`b`) to navigate back
         - Type (`q`) to quit  
 
-## Updating RPI mcu:  
+### - Updating RPI mcu:  
 Reference : https://www.klipper3d.org/RPi_microcontroller.html#install-the-rc-script  
 
 1. In the menu, set "Microcontroller Architecture" to "Linux process," then save and exit.
 
-## Finished
+### - Finished
 1. Once all steps `1-7` are completed reboot and everything should be working correctly
+
+### - Optional Steps after everything is verified and working
+- Remove configuration backup files with option `8`
+- Enable webcam with option `9` ( This can be ran at any time )
