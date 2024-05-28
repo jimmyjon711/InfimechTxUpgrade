@@ -132,6 +132,8 @@ Reference : https://www.klipper3d.org/RPi_microcontroller.html#install-the-rc-sc
 
 ### - Finished
 1. Once all steps `1-7` are completed reboot and everything should be working correctly
+1. Put bottom cover back on.
+1. Rerun Temperature calibration, Resonance Compensation, and Auto leveling before using again 
 
 ### - Optional Steps after everything is verified and working
 - Remove configuration backup files with option `8`
