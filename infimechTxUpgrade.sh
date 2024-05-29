@@ -51,6 +51,10 @@ update_system() {
     sudo apt update
     sudo apt upgrade
 
+    # Making sure numpy is installed for resonance compensation
+    echo -e "${G}Making sure numpy is installed${NL_NOCOLOR}"
+    sudo apt install python3-numpy python3-matplotlib libatlas-base-dev libopenblas-dev
+
     press_any_key
 }
 
@@ -85,6 +89,13 @@ run_kiauh()
     case $choice in
         Y|y|Yes|yes) echo "${G}Launching Kiauh again...${NL_NOCOLOR}"; sleep 5; ${HOME_DIR}/kiauh/kiauh.sh;;
     esac
+
+    press_any_key
+}
+
+install_numpy(){
+    echo -e "${G}Installing numpy${NL_NOCOLOR}"
+    ${HOME_DIR}/klippy-env/bin/pip install -v numpy
 
     press_any_key
 }
@@ -238,13 +249,15 @@ print_menu() {
     echo ""
     echo "5) Run kiauh"
     echo ""
-    echo "6) Fix configuration files"
+    echo "6) Install numpy (resonance compensation)"
     echo ""
-    echo "7) Update RPI MCU"
+    echo "7) Fix configuration files"
     echo ""
-    echo "8) Clean up config_back (only run after everything is working correctly)"
+    echo "8) Update RPI MCU"
     echo ""
-    echo "9) Enable webcamd"
+    echo "9) Clean up config_back (only run after everything is working correctly)"
+    echo ""
+    echo "10) Enable webcamd"
     echo ""
     echo "a) Run all"
     echo ""
@@ -258,6 +271,7 @@ run_all(){
     resize_disk
     backup_function
     run_kiauh
+    install_numpy
     fix_config_files
     update_rpi_mcu
     start_services
@@ -274,10 +288,11 @@ while true; do
         3) resize_disk;;
         4) backup_function;;
         5) run_kiauh;;
-        6) fix_config_files;;
-        7) update_rpi_mcu;;
-        8) clean_up_config_backup;;
-        9) enable_webcamd;;
+        6) install_numpy;;
+        7) fix_config_files;;
+        8) update_rpi_mcu;;
+        9) clean_up_config_backup;;
+        10) enable_webcamd;;
         a) run_all;;
         q) clear; echo -e "${G}Please reboot and Happy Printing${NL_NOCOLOR}"; sleep 2; exit 0;;
         *) echo -e "${R}Invalid choice. Please try again.${NL_NOCOLOR}";;

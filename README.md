@@ -78,7 +78,7 @@ Linux
     ```
     ~\infimechTxUpgrade.sh
     ```
-1. Either run all with `a` or choose each step in order from `1-7`
+1. Either run all with `a` or choose each step in order from `1-8`
 1. See sections with prompted with input
 1. Once done reboot
     ```
@@ -131,9 +131,15 @@ Reference : https://www.klipper3d.org/RPi_microcontroller.html#install-the-rc-sc
 1. In the menu, set "Microcontroller Architecture" to "Linux process," then save and exit.
 
 ### - Finished
-1. Once all steps `1-7` are completed reboot and everything should be working correctly
+1. Once all steps `1-8` are completed reboot and everything should be working correctly
 1. Put bottom cover back on.
-1. Rerun Temperature calibration, Resonance Compensation, and Auto leveling before using again 
+1. Rerun Temperature calibration, Resonance Compensation, and Auto leveling before using again
+    ```
+    PID_CALIBRATE HEATER=extruder TARGET=200
+    ```
+    ```
+    PID_CALIBRATE HEATER=heater_bed TARGET=60
+    ```
 
 ### - Optional Steps after everything is verified and working
 - Remove configuration backup files with option `8`
