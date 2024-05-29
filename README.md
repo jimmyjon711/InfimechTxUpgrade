@@ -129,8 +129,8 @@ Linux
     1. Type(`2`) for `[Update]`
     1. Type(`4`) for `[Fluidd]`
        Manually update anything else
-    1. Type ('b') to navigate back
-    1. Type (`q`) to quit kiauh  
+    1. Type(`b`) to navigate back
+    1. Type(`q`) to quit kiauh  
 
 ### - Updating RPI mcu:  
 Reference : https://www.klipper3d.org/RPi_microcontroller.html#install-the-rc-script  
