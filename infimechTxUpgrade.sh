@@ -134,7 +134,7 @@ fix_config_files() {
     echo -e "${G}Updating configuration files${NL_NOCOLOR}"
 
     echo -e "${G}Copying gcode_files${NL_NOCOLOR}"
-    cp -rp ${BACKUP_LOCATION}/gcode_files/* ${PRINTER_DATA_CP}/gcodes/
+    cp -rp ${BACKUP_LOCATION}/gcode_files/. ${PRINTER_DATA_CP}/gcodes/
     echo -e "${G}Removing ~/gcode_files${NL_NOCOLOR}"
     rm -rf ${HOME_DIR}/gcode_files 
 
