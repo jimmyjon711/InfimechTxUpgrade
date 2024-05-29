@@ -122,8 +122,15 @@ Linux
         - Type (`8`) for `[G-Code Shell Command]`
             - Select `Y` to install at your own risk
             - Select `N` to create and example shell command?
-        - Type (`b`) to navigate back
-        - Type (`q`) to quit  
+        - Type (`b`) to navigate back  
+
+    Updating Other plugins
+
+    1. Type(`2`) for `[Update]`
+    1. Type(`4`) for `[Fluidd]`
+       Manually update anything else
+    1. Type ('b') to navigate back
+    1. Type (`q`) to quit kiauh  
 
 ### - Updating RPI mcu:  
 Reference : https://www.klipper3d.org/RPi_microcontroller.html#install-the-rc-script  
