@@ -21,7 +21,7 @@ The Infimech-TX has a Piezo Buzzer integrated on the MKS SKIPR MINI mainboard, b
 ## How to make it buzzzzzzz??
 The beeper.cfg file includes 3 components:
 - The configuration of the beeper PIN for klipper.
-- A gcode_macro for the M300 which is the standard command used to beep.
+- A gcode_macro for M300 which is the standard command used to beep.
 - A set of gcode_macros to turn a continuous buzzer on and off (BUZZ_ON/BUZZ_OFF) 
 
 The M300 Macro has 2 parameters:
