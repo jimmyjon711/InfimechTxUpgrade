@@ -72,7 +72,7 @@ Linux
 # Download and run script
 1. Pull script
     ```
-     wget https://raw.githubusercontent.com/jimmyjon711/InfimexTxUpgrade/main/infimechTxUpgrade.sh && chmod +x ./infimechTxUpgrade.sh
+     wget https://raw.githubusercontent.com/jimmyjon711/InfimechTxUpgrade/main/infimechTxUpgrade.sh && chmod +x ./infimechTxUpgrade.sh
     ```
 1. Run script 
     ```
@@ -166,6 +166,7 @@ Reference : https://www.klipper3d.org/RPi_microcontroller.html#install-the-rc-sc
         wget https://raw.githubusercontent.com/mainsail-crew/crowsnest/master/tools/dev-helper.sh && chmod +x ./dev-helper.sh && dev-helper.sh -c
         ```
         - Should look like the following  
-        ![alt text](https://github.com/jimmyjon711/InfimexTxUpgrade/blob/main/pics/suported_camera.png)
+        ![alt text](https://github.com/jimmyjon711/InfimechTxUpgrade/blob/main/pics/suported_camera.png)
         - Insert device for the `-d` option. In the screenshot the `-d` option would be `/dev/video4`
+- 
 
