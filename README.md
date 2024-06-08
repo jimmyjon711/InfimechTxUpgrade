@@ -161,5 +161,6 @@ Reference : https://www.klipper3d.org/RPi_microcontroller.html#install-the-rc-sc
         - Download crowsnest helper tool
         `wget https://raw.githubusercontent.com/mainsail-crew/crowsnest/master/tools/dev-helper.sh && chmod +x ./dev-helper.sh`
         - Run `dev-helper.sh -c`
-        - Should look like the [following](https://github.com/jimmyjon711/InfimexTxUpgrade/blob/main/pics/suported_camera.png)
+        - Should look like the following  
+        ![alt text](https://github.com/jimmyjon711/InfimexTxUpgrade/blob/main/pics/suported_camera.png)
         - Insert device for the `-d` option. In the screenshot the `-d` option would be `/dev/video4`
