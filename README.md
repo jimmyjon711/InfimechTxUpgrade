@@ -157,10 +157,19 @@ Reference : https://www.klipper3d.org/RPi_microcontroller.html#install-the-rc-sc
 - In klipper web gui navigate to **Configuration**
 - Open **webcam.txt** file and edit `camera_usb_options`. Make sure the `-d` option points to your webcam.
     - If you are having trouble finding your webcam run the following in an ssh session
-        - Install **v4l-utils** `sudo apt get install v4l-utils`
-        - Download crowsnest helper tool
-        `wget https://raw.githubusercontent.com/mainsail-crew/crowsnest/master/tools/dev-helper.sh && chmod +x ./dev-helper.sh`
-        - Run `dev-helper.sh -c`
+        - Install **v4l-utils**  
+        ```
+        sudo apt get install v4l-utils
+        ```
+        - Download crowsnest helper tool  
+        ```
+        wget https://raw.githubusercontent.com/mainsail-crew/crowsnest/master/tools/dev-helper.sh && chmod +x ./dev-helper.sh
+        ```
+        - Run  
+        ```
+        dev-helper.sh -c
+        ```
         - Should look like the following  
         ![alt text](https://github.com/jimmyjon711/InfimexTxUpgrade/blob/main/pics/suported_camera.png)
         - Insert device for the `-d` option. In the screenshot the `-d` option would be `/dev/video4`
+        
