@@ -1,0 +1,24 @@
+# Version 1.0.0
+# This guide will help you enable the KAMP function by including a few documents and running a better PRINT_START macro. 
+# It is recommended to back up all configuration files (cfg) on your printer.
+
+# Step1. 
+# Add following to Machine G-Code section in your slicer
+PRINT_START BED_TEMP=[first_layer_bed_temperature] EXTRUDER_TEMP=[nozzle_temperature_initial_layer]
+
+# Step2.
+# Download the following files:
+#   1. printer.cfg
+#   2. Macro.cfg
+#   3. Line_Purge.cfg
+#   4. KAMP_Settings.cfg
+#   5. Adaptive_Meshing.cfg
+
+# Step3.
+# Replace printer.cfg and upload files 2 to 5 to your printer.
+
+# Step4.
+# Redo the input shaper calibration, PID calibration and bed mesh. Please remember save config.
+
+# Step5.
+# Print a test object like a 3Dbenchy. Be sure to watch the first print! 
