@@ -1,4 +1,4 @@
-# Version 1.0.0
+# Version 1.0.1
 
 This manual only explains the actions I have taken. To implement these changes, please refer to Guide.txt.
 
@@ -53,16 +53,20 @@ default_prefix: System State:
 #### In # Home X Y Z:
 1. Rewrote XY homing.
 2. Replaced `Z_DOUDONG` with `Z_DOUDONG1`.
+3. Fix some homing bug.(Version 1.0.1)
 
 ### Rewrite `[PRINT_START]` macro:
 1. Added `M118` gcode command to check printer state.
 2. Rewrote `BED_MESH_CALIBRATE` to `BED_MESH_CALIBRATE ADAPTIVE=1` (Adaptive=1 means the printer only performs bed_mesh on the printing object area).
 3. Added `Line_Purge` function to clean the nozzle before printing the first layer.
 4. Removed the purge line written by Infimech's official team.
+5. Optimized the heating sequence: the hotbed now heats first and reaches the target temperature before the hotend begins heating. (Version 1.0.1)
 
 ### In `[clean_nozzle_position]` macro:
 1. Replaced `Z_DOUDONG` with `Z_DOUDONG1`.
 2. Changed `M140 S40` to `S60`.
+3. If hotbed temperature < 65°C than preheat hotbed else maintain hotbed temperature.(Version 1.0.1)
+4. Speed up nozzle wipe process.(Version 1.0.1)
 
 ### Rewrite `[Z_DOUDONG1]` macro:
 The vibration of the z_stepper will trigger the piezoelectric element. To avoid this, we need to `SET_PIN PIN=test_Z VALUE=1` and shake the printer bed to record a background value. However, it is not necessary to shake 110 times. In my tests, 8 times was sufficient.
