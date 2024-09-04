@@ -15,7 +15,7 @@ Guide/script still a work in progress but its good enough to upgrade to klipper 
     - Future work to compile Armbian 24 and get this working corectly.... TBD
 
 ## What this script does not do
-- Script/guide does not update the STM32 microcontroller to klipper 12, updating the microcontroller will be a manual process that is documented at the end of this [document](manually-updating-microcontroller)
+- Install script does not update the STM32 microcontroller to klipper 12 automatically, updating the microcontroller will be a manual process that is documented at the end of this [document](#manually-updating-microcontroller)
 
 # Prerequisites
 The following steps are for backing up and moving to a bigger eMMC module.
@@ -172,6 +172,8 @@ Reference : https://www.klipper3d.org/RPi_microcontroller.html#install-the-rc-sc
 
 
 ## Manually updating Microcontroller
+
+The following instructions were provided by **GoldenGreek**
 
 This process assumes that you have already run the InfimechTXUpgrade.sh file from this repository to get to klipper 0.12 first!  The directory structure that these steps assume are dependent on this.
 
