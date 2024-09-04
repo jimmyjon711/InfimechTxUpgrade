@@ -365,6 +365,12 @@ class LCD:
             self.write("main.nozzletemp.txt=\"%d / %d\"" % (data.hotend, data.hotend_target))
         if data.bed != self.printer.bed or data.bed_target != self.printer.bed_target:
             self.write("main.bedtemp.txt=\"%d / %d\"" % (data.bed, data.bed_target))
+        if data.x_pos != self.printer.x_pos:
+            self.write("premove.x_pos.txt=\"%d\"" % (data.x_pos))
+        if data.y_pos != self.printer.y_pos:
+            self.write("premove.y_pos.txt=\"%d\"" % (data.y_pos))
+        if data.z_pos != self.printer.z_pos:
+            self.write("premove.z_pos.txt=\"%d\"" % (data.z_pos))
 
         if self.probe_mode and data.z_pos != self.printer.z_pos:
             self.write("leveldata.z_offset.val=%d" % (int)(data.z_pos * 100))
