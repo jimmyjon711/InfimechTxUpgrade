@@ -35,7 +35,7 @@ Linux
 1. Insert eMMC module into USB module and insert into computer, make sure to insert it the correct way.
 1. Run
     ```
-    dd ds=4M if=/dev/sdx > gzip > infimechTx_bak.img.gz
+    dd bs=4m if=/dev/sdX | gzip > infimechTx_bak.img.gz
     ```
 1. Remove eMMC module from computer
 1. Run the following if upgrading to bigger eMMC module
@@ -194,6 +194,7 @@ This process assumes that you have already run the InfimechTXUpgrade.sh file fro
     - Set Processor Model to STM32F401
     - Ensure that Bootloader offset is set to 32Kib bootloader
     - Ensure that communication interface is set to USB (on PA11/PA12)
+    - Press `Q`, and `Yes` when prompted to save your configuration
 
     KIAUH will now compile your firmware:
 
@@ -212,3 +213,4 @@ This process assumes that you have already run the InfimechTXUpgrade.sh file fro
 1. Power on the printer, once you can get to the web interface navigate to `System` (second from the bottom option on the left side)
 1. Verify `mcu information` Version shows **v0.12.0-xxx-xxxxxxxxx** (See picture below), your x's will be something different depending on when klipper was pulled from github.
     ![MCU flashed](./pics/mcu_flashed.png)
+1. Properly shutdown the Infimech and power it off then remove SD-Card from the MCU TF-Card slot.
