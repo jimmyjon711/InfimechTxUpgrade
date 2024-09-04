@@ -10,7 +10,7 @@ from lcd import LCD, _printerData
 
 class KlipperLCD ():
     def __init__(self):
-        self.lcd = LCD("/dev/ttyUSB0", callback=self.lcd_callback)
+        self.lcd = LCD("/dev/ttyUSB5", callback=self.lcd_callback)
         self.lcd.start()
         self.printer = PrinterData('XXXXXX', URL=("127.0.0.1"), klippy_sock='/home/biqu/printer_data/comms/klippy.sock', callback=self.printer_callback)
         self.running = False
@@ -76,7 +76,7 @@ class KlipperLCD ():
 
             self.lcd.data_update(data)
                 
-            time.sleep(2)
+            time.sleep(1)
 
     def printer_callback(self, data, data_type):
         msg = self.lcd.format_console_data(data, data_type)
