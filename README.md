@@ -15,7 +15,7 @@ Guide/script still a work in progress but its good enough to upgrade to klipper 
     - Future work to compile Armbian 24 and get this working corectly.... TBD
 
 ## What this script does not do
-- Script/guide does not update the STM32 microcontroller to klipper 12, once I figure this out (should be straight forwards ) I will update this guide
+- Script/guide does not update the STM32 microcontroller to klipper 12, updating the microcontroller will be a manual process that is documented at the end of this [document](manually-updating-microcontroller)
 
 # Prerequisites
 The following steps are for backing up and moving to a bigger eMMC module.
@@ -139,6 +139,7 @@ Reference : https://www.klipper3d.org/RPi_microcontroller.html#install-the-rc-sc
 
 ### - Finished
 1. Once all steps `1-8` are completed reboot and everything should be working correctly
+1. If you run into the following error **Option 'position_endstop' is not valid in section 'stepper_z'** when rebooting, then navigate to your **printer.cfg** file and search for `[stepper_z]` then comment out the `position_endstop: -4` line. Save and restart.
 1. Put bottom cover back on.
 1. Rerun Temperature calibration, Resonance Compensation, and Auto leveling before using again
     ```
@@ -168,5 +169,44 @@ Reference : https://www.klipper3d.org/RPi_microcontroller.html#install-the-rc-sc
         - Should look like the following  
         ![alt text](https://github.com/jimmyjon711/InfimechTxUpgrade/blob/main/pics/suported_camera.png)
         - Insert device for the `-d` option. In the screenshot the `-d` option would be `/dev/video4`
-- 
 
+
+## Manually updating Microcontroller
+
+This process assumes that you have already run the InfimechTXUpgrade.sh file from this repository to get to klipper 0.12 first!  The directory structure that these steps assume are dependent on this.
+
+1. SSH to the Infimech and login as mks/makerbase
+1. `cd kiauh`
+1. `./kiauh.sh`
+1. If prompted to update, enter `Y`, and then rerun the above command to relaunch kiauh.
+1. Select option (`4`) for `advanced`
+1. Select option (`2`) for `build only`  
+    
+    You will get the Klipper Firmware Configuration window:
+    
+    ![(Firmware Configuration)](./pics/micro_mcu_config.png)
+
+    Change the following settings:
+
+    - Set Micro-Controller Architecture to STMicroelectronics STM32
+    - Set Processor Model to STM32F401
+    - Ensure that Bootloader offset is set to 32Kib bootloader
+    - Ensure that communication interface is set to USB (on PA11/PA12)
+
+    KIAUH will now compile your firmware:
+
+1. Type `B` and hit enter to go back, then type `Q` and hit enter to quit KIAUH.
+1. Enter the following command to rename and and copy the file so you can download it from fluidd:
+    ```
+    cp ~/klipper/out/klipper.bin ~/printer_data/config/mks_skipr_mini.bin
+    ```
+1. Go to your printer's web interface and download the msk_skipr_mini.bin file
+1. Copy the file you downloaded to a microSD card.
+1. Properly shutdown the Infimech and power it off then insert the microSD card into the sd-card slot.
+    - This slot is located on the mainboard, and is accessible without taking the bottom off. There is an opening on the side that you can sneak the card in if you could see it properly. (But be careful, if you drop it then you are taking the bottom off to retrieve the sd-card)
+    
+        It's easiest to remove the left side panel to pop the card in.  The bottom does not need to come off.
+
+1. Power on the printer, once you can get to the web interface navigate to `System` (second from the bottom option on the left side)
+1. Verify `mcu information` Version shows **v0.12.0-xxx-xxxxxxxxx** (See picture below), your x's will be something different depending on when klipper was pulled from github.
+    ![MCU flashed](./pics/mcu_flashed.png)
