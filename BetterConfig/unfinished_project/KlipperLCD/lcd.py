@@ -146,8 +146,8 @@ class LCD:
         self.callback = callback
         self.printer = _printerData()
                          # PLA, ABS, PETG, TPU, PROBE 
-        self.preset_temp     = [200, 245,  225, 220, 200]
-        self.preset_bed_temp = [ 60, 100,   70,  60,  60]
+        self.preset_temp     = [200, 250,  225, 220, 130]
+        self.preset_bed_temp = [ 60, 105,   70,  60,  60]
         self.preset_index    = 0
         # UART communication parameters
         self.ser = serial.Serial()
