@@ -31,8 +31,8 @@ class KlipperLCD ():
 
         print(self.printer.MACHINE_SIZE)
         print(self.printer.SHORT_BUILD_VERSION)
-        self.lcd.write("information.size.txt=\"%s\"" % self.printer.MACHINE_SIZE)
-        self.lcd.write("information.sversion.txt=\"%s\"" % self.printer.SHORT_BUILD_VERSION)
+        #self.lcd.write("information.size.txt=\"%s\"" % self.printer.MACHINE_SIZE)
+        #self.lcd.write("information.sversion.txt=\"%s\"" % self.printer.SHORT_BUILD_VERSION)
         self.lcd.write("page main")
 
     def start(self):
@@ -125,7 +125,7 @@ class KlipperLCD ():
                 img = base64.b64decode(b64)        
                 
                 # Write thumbnail to LCD
-                self.lcd.write_thumbnail(img)
+                #self.lcd.write_thumbnail(img)
             else:
                 self.lcd.clear_thumbnail()
                 print("Aborting thumbnail, no image found")

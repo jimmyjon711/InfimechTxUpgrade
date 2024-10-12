@@ -213,7 +213,6 @@ class LCD:
         self.write(b'main.va0.val=1')
         self.write("boot.j0.val=1")
         self.write("boot.t0.txt=\"KlipperLCD.service starting...\"")
-        # sleep(1)
         # self.write("page main")
     
     def boot_progress(self, progress):
