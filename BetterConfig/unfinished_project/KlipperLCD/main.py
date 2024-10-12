@@ -3,14 +3,13 @@ import sys
 import time
 import base64
 from threading import Thread
-from datetime import timedelta
 
 from printer import PrinterData
 from lcd import LCD, _printerData
 
 class KlipperLCD ():
     def __init__(self):
-        self.lcd = LCD("/dev/ttyUSB4", callback=self.lcd_callback)
+        self.lcd = LCD("/dev/ttyUSB0", callback=self.lcd_callback)
         self.lcd.start()
         self.printer = PrinterData('XXXXXX', URL=("127.0.0.1"), klippy_sock='/home/biqu/printer_data/comms/klippy.sock', callback=self.printer_callback)
         self.running = False
@@ -25,16 +24,16 @@ class KlipperLCD ():
 
         self.printer.init_Webservices()
         gcode_store = self.printer.get_gcode_store()
-        # self.lcd.write_gcode_store(gcode_store)
+        # self.lcd.write_gcode_store(gcode_store) #Annotation by Oren
 
         macros = self.printer.get_macros()
-        # self.lcd.write_macros(macros)
+        # self.lcd.write_macros(macros) #Annotation by Oren
 
         print(self.printer.MACHINE_SIZE)
         print(self.printer.SHORT_BUILD_VERSION)
-        # self.lcd.write("information.size.txt=\"%s\"" % self.printer.MACHINE_SIZE)
-        # self.lcd.write("information.sversion.txt=\"%s\"" % self.printer.SHORT_BUILD_VERSION)
-        # self.lcd.write("page main")
+        self.lcd.write("information.size.txt=\"%s\"" % self.printer.MACHINE_SIZE)
+        self.lcd.write("information.sversion.txt=\"%s\"" % self.printer.SHORT_BUILD_VERSION)
+        self.lcd.write("page main")
 
     def start(self):
         print("KlipperLCD start")
@@ -76,7 +75,7 @@ class KlipperLCD ():
 
             self.lcd.data_update(data)
                 
-            time.sleep(1)
+            time.sleep(0.1)
 
     def printer_callback(self, data, data_type):
         msg = self.lcd.format_console_data(data, data_type)
@@ -126,7 +125,7 @@ class KlipperLCD ():
                 img = base64.b64decode(b64)        
                 
                 # Write thumbnail to LCD
-                # self.lcd.write_thumbnail(img)
+                self.lcd.write_thumbnail(img)
             else:
                 self.lcd.clear_thumbnail()
                 print("Aborting thumbnail, no image found")
@@ -153,6 +152,12 @@ class KlipperLCD ():
             self.printer.setExtTemp(data)
         elif evt == self.lcd.evt.BED:
             self.printer.setBedTemp(data)
+        elif evt == self.lcd.evt.POSITION_X:      # Add by Oren
+            self.printer.setPosition("X",data) 
+        elif evt == self.lcd.evt.POSITION_Y:      # Add by Oren
+            self.printer.setPosition("Y",data)
+        elif evt == self.lcd.evt.POSITION_Z:      # Add by Oren
+            self.printer.setPosition("Z",data)
         elif evt == self.lcd.evt.FILES:
             files = self.printer.GetFiles(True)
             return files
@@ -172,6 +177,12 @@ class KlipperLCD ():
             self.printer.pause_job()
         elif evt == self.lcd.evt.PRINT_RESUME:
             self.printer.resume_job()
+        elif evt == self.lcd.evt.EMERGENCY_STOP: # Add by Oren
+            self.printer.emergency_stop()
+        elif evt == self.lcd.evt.FIRMWARE_RESTART: # Add by Oren
+            self.printer.firmware_restart()        
+        elif evt == self.lcd.evt.HOST_RESTART: # Add by Oren
+            self.printer.host_restart()                
         elif evt == self.lcd.evt.PRINT_SPEED:
             self.printer.set_print_speed(data)
         elif evt == self.lcd.evt.FLOW:

@@ -472,9 +472,15 @@ class PrinterData:
 				self.files = self.getREST('/server/files/list')["result"]
 			except:
 				print("Exception 418")
-		names = []
-		for fl in self.files:
-			names.append(fl["path"])
+				return[]
+		try:
+			sorted_files = sorted(self.files, key=lambda fl: fl.get("modified", 0), reverse=True)
+		except KeyError:
+			print("KeyError: 'modified' field not found in some files.")
+			return []
+		
+		names = [fl["path"] for fl in sorted_files]
+		
 		return names
 
 	def update_variable(self):
@@ -599,6 +605,19 @@ class PrinterData:
 		print('Resuming job:')
 		self.postREST('/printer/print/resume', json=None)
 
+	def emergency_stop(self): #fixed (Add by Oren)
+		print('Emergency stop')
+		self.postREST('/printer/emergency_stop', json=None)
+	
+	def firmware_restart(self): #fixed (Add by Oren)
+		print('Firmware_restart')
+		self.postREST('/printer/firmware_restart', json=None)
+	
+	def host_restart(self): #fixed (Add by Oren)
+		print('Host restart')
+		self.postREST('/printer/restart', json=None)
+
+
 	def set_print_speed(self, fr):
 		self.print_speed = fr
 		self.sendGCode('M220 S%d' % fr)
@@ -660,10 +679,13 @@ class PrinterData:
 
 	def setExtTemp(self, target, toolnum=0):
 		self.sendGCode('M104 T%s S%s' % (toolnum, target))
-
+	
 	def setBedTemp(self, target):
 		self.sendGCode('M140 S%s' % target)
 
+	def setPosition(self, pos ,target): 			# Add by Oren
+		self.sendGCode('G1 %s %s' % (pos, target))
+		
 	def preHeat(self, bedtemp, exttemp, toolnum=0):
 		self.setBedTemp(bedtemp)
 		self.setExtTemp(exttemp)

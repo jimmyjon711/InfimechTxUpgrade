@@ -96,11 +96,18 @@ class LCDEvents():
     SQUARE_CORNER_VELOCITY = 27
     THUMBNAIL      = 28
     CONSOLE        = 29
+    EMERGENCY_STOP = 30    # Add by Oren
+    FIRMWARE_RESTART = 31  # Add by Oren
+    HOST_RESTART   = 32    # Add by Oren
+    POSITION_X       = 33  # Add by Oren
+    POSITION_Y       = 34  # Add by Oren
+    POSITION_Z       = 35  # Add by Oren
 
 
 class LCD:
     def __init__(self, port=None, baud=115200, callback=None):
         self.addr_func_map = {
+            0x1001: self._EmergencyStop,
             0x1002: self._MainPage,          
             0x1004: self._Adjustment,        
             0x1006: self._PrintSpeed,        
@@ -117,9 +124,12 @@ class LCD:
             0x1040: self._SettingBack,       
             0x1044: self._BedLevelFun,       
             0x1046: self._AxisPageSelect,    
-            0x1048: self._Xaxismove,         
-            0x104A: self._Yaxismove,         
-            0x104C: self._Zaxismove,         
+            0x1048: self._Xaxismove, 
+            0x1049: self._XposEnter, # Add by Oren        
+            0x104A: self._Yaxismove, 
+            0x104B: self._YposEnter, # Add by Oren        
+            0x104C: self._Zaxismove,
+            0x104D: self._ZposEnter, # Add by Oren       
             0x104E: self._SelectExtruder,    
             0x1054: self._Heater0LoadEnter,  
             0x1056: self._FilamentLoad,      
@@ -139,7 +149,9 @@ class LCD:
             0x2201: self._SetPreBedTemp,     
             0x2202: self._HardwareTest,      
             0X2203: self._Err_Control,
-            0x4201: self._Console
+            0x4201: self._Console,
+            0x6001: self._Firmware_Restart,
+            0x6002: self._Host_Restart
         }
 
         self.evt = LCDEvents()
@@ -159,6 +171,7 @@ class LCD:
         self.rx_data_cnt = 0
         self.rx_state = RX_STATE_IDLE
         self.error_from_lcd = False
+        self.MainPageFlag = False ## Add by Oren
         # List of GCode files
         self.files = False
         self.selected_file = False
@@ -200,7 +213,8 @@ class LCD:
         self.write(b'main.va0.val=1')
         self.write("boot.j0.val=1")
         self.write("boot.t0.txt=\"KlipperLCD.service starting...\"")
-        #self.write("page main")
+        # sleep(1)
+        # self.write("page main")
     
     def boot_progress(self, progress):
         self.write("boot.t0.txt=\"Waiting for Klipper...\"")
@@ -241,8 +255,8 @@ class LCD:
         # Open as image
         im = Image.open(BytesIO(img))
         width, height = im.size
-        if width != 160 or height != 160:
-            im = im.resize((160, 160))
+        if width != 145 or height != 145:
+            im = im.resize((145, 145))
             width, height = im.size
 
         pixels = im.load()
@@ -256,11 +270,11 @@ class LCD:
                 b = b >> 3
                 rgb = (r << 11) | (g << 5) | b
                 if rgb == 0x0000:
-                    rgb = 0x4AF0
+                    rgb = 0xE73D
                 color16.append(rgb)
 
         output_data = bytearray(height * width * 10)
-        result_int = lib_col_pic.ColPic_EncodeStr(color16, width, height, output_data, width * height * 10, 1024)
+        # result_int = lib_col_pic.ColPic_EncodeStr(color16, width, height, output_data, width * height * 10, 1024)
 
         each_max = 512
         j = 0
@@ -361,10 +375,13 @@ class LCD:
             self.write("pretemp.nozzle.txt=\"%d\"" % data.hotend_target)
         if data.bed_target != self.printer.bed_target:
             self.write("pretemp.bed.txt=\"%d\"" % data.bed_target)
-        if data.hotend != self.printer.hotend or data.hotend_target != self.printer.hotend_target:
-            self.write("main.nozzletemp.txt=\"%d / %d\"" % (data.hotend, data.hotend_target))
-        if data.bed != self.printer.bed or data.bed_target != self.printer.bed_target:
-            self.write("main.bedtemp.txt=\"%d / %d\"" % (data.bed, data.bed_target))
+        # if data.hotend != self.printer.hotend or data.hotend_target != self.printer.hotend_target:    #Annotation by Oren
+        self.write("main.nozzletemp.txt=\"%d / %d\"" % (data.hotend, data.hotend_target))
+        # if data.bed != self.printer.bed or data.bed_target != self.printer.bed_target:    #Annotation by Oren
+        self.write("main.bedtemp.txt=\"%d / %d\"" % (data.bed, data.bed_target))
+        if self.MainPageFlag == True:
+            self.write("add s0.id,0,%d\xff\xff\xff" % (data.bed))       # Add by Oren
+            self.write("add s0.id,1,%d\xff\xff\xff" % (data.hotend))    # Add by Oren
         if data.x_pos != self.printer.x_pos:
             self.write("premove.x_pos.txt=\"%d\"" % (data.x_pos))
         if data.y_pos != self.printer.y_pos:
@@ -523,9 +540,11 @@ class LCD:
             if (files):
                 i = 0
                 for file in files:
-                    print(file)
                     page_num = ((i / 5) + 1)
-                    self.write("file%d.t%d.txt=\"%s\"" % (page_num, i, file))
+                    if page_num <= 5:
+                        self.write("file%d.t%d.txt=\"%s\"" % (page_num, i, file))
+                    else:
+                        pass
                     i += 1
                 self.write("page file1")
             else:
@@ -613,7 +632,6 @@ class LCD:
         else:
             print("_PausePrint: %d not supported" % data[0])
            
-    
     def _ResumePrint(self, data):       
         if data[0] == 0x01:
             if self.printer.state == "paused" or self.printer.state == "pausing":
@@ -621,6 +639,24 @@ class LCD:
             self.write("page printpause")
         else:
             print("_ResumePrint: %d not supported" % data[0])
+    
+    def _EmergencyStop(self, data):   # Add by Oren
+        if data[0] == 0x01:
+            self.callback(self.evt.EMERGENCY_STOP)
+        else:
+            print("_EmergencyStop: %d not supported" % data[0])
+
+    def _Firmware_Restart(self, data):   # Add by Oren
+        if data[0] == 0x01:
+            self.callback(self.evt.FIRMWARE_RESTART)
+        else:
+            print("_EmergencyStop: %d not supported" % data[0])
+    
+    def _Host_Restart(self, data):   # Add by Oren
+        if data[0] == 0x01:
+            self.callback(self.evt.HOST_RESTART)
+        else:
+            print("_EmergencyStop: %d not supported" % data[0])
     
     def _ZOffset(self, data):           
         print("_ZOffset: %d not supported" % data[0])
@@ -821,6 +857,21 @@ class LCD:
     def _HotBedTempEnter(self, data):   
         temp = ((data[0] & 0x00FF) << 8) | ((data[0] & 0xFF00) >> 8) 
         self.callback(self.evt.BED, temp)
+    
+    def _XposEnter(self, data): # Add by Oren
+        pos = ((data[0] & 0x00FF) << 8) | ((data[0] & 0xFF00) >> 8) 
+        print("Set X postion: %d" % pos)
+        self.callback(self.evt.POSITION_X, pos)
+
+    def _YposEnter(self, data): # Add by Oren
+        pos = ((data[0] & 0x00FF) << 8) | ((data[0] & 0xFF00) >> 8) 
+        print("Set Y postion: %d" % pos)
+        self.callback(self.evt.POSITION_Y, pos)
+
+    def _ZposEnter(self, data): # Add by Oren
+        pos = ((data[0] & 0x00FF) << 8) | ((data[0] & 0xFF00) >> 8) 
+        print("Set Z postion: %d" % pos)
+        self.callback(self.evt.POSITION_Z, pos)
     
     def _SettingScreen(self, data):
         if data[0] == 0x01:
@@ -1094,7 +1145,10 @@ class LCD:
     
     def _HardwareTest(self, data):
         if data[0] == 0x0f: # Hardware test page
-            pass #Always requested on main page load, ignore
+            self.MainPageFlag = True    # Add by Oren
+            pass                        # Always requested on main page load, ignore
+        elif data[0] == 0x0e:           # Add by Oren
+            self.MainPageFlag = False   # Add by Oren
         else:
             print ("_HardwareTest: Not implemented: 0x%x" % data[0])
     
