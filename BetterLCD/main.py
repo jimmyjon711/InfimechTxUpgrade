@@ -31,8 +31,8 @@ class KlipperLCD ():
 
         print(self.printer.MACHINE_SIZE)
         print(self.printer.SHORT_BUILD_VERSION)
-        #self.lcd.write("information.size.txt=\"%s\"" % self.printer.MACHINE_SIZE)
-        #self.lcd.write("information.sversion.txt=\"%s\"" % self.printer.SHORT_BUILD_VERSION)
+        #self.lcd.write("information.size.txt=\"%s\"" % self.printer.MACHINE_SIZE) #Annotation by Oren
+        #self.lcd.write("information.sversion.txt=\"%s\"" % self.printer.SHORT_BUILD_VERSION) #Annotation by Oren
         self.lcd.write("page main")
 
     def start(self):
@@ -95,7 +95,7 @@ class KlipperLCD ():
             file = self.printer.file_path + "/" + file_name
 
             # Reading file
-            print(file)
+            # print(file)
             f = open(file, "r")
             if not f:
                 f.close()
@@ -153,11 +153,11 @@ class KlipperLCD ():
         elif evt == self.lcd.evt.BED:
             self.printer.setBedTemp(data)
         elif evt == self.lcd.evt.POSITION_X:      # Add by Oren
-            self.printer.setPosition("X",data) 
+            self.printer.moveAbsolute("X", data, 7500) 
         elif evt == self.lcd.evt.POSITION_Y:      # Add by Oren
-            self.printer.setPosition("Y",data)
+            self.printer.moveAbsolute("Y", data, 7500)
         elif evt == self.lcd.evt.POSITION_Z:      # Add by Oren
-            self.printer.setPosition("Z",data)
+            self.printer.moveAbsolute("Z", data, 1000)
         elif evt == self.lcd.evt.FILES:
             files = self.printer.GetFiles(True)
             return files
@@ -177,11 +177,11 @@ class KlipperLCD ():
             self.printer.pause_job()
         elif evt == self.lcd.evt.PRINT_RESUME:
             self.printer.resume_job()
-        elif evt == self.lcd.evt.EMERGENCY_STOP: # Add by Oren
+        elif evt == self.lcd.evt.EMERGENCY_STOP:   # Add by Oren
             self.printer.emergency_stop()
         elif evt == self.lcd.evt.FIRMWARE_RESTART: # Add by Oren
             self.printer.firmware_restart()        
-        elif evt == self.lcd.evt.HOST_RESTART: # Add by Oren
+        elif evt == self.lcd.evt.HOST_RESTART:     # Add by Oren
             self.printer.host_restart()                
         elif evt == self.lcd.evt.PRINT_SPEED:
             self.printer.set_print_speed(data)

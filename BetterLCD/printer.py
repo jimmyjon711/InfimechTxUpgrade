@@ -379,15 +379,18 @@ class PrinterData:
 		self.sendGCode(gc)
 
 	def probe_adjust(self, change):
-		gc = 'TESTZ Z={}'.format(change)
-		print(gc)
-		self.sendGCode(gc)
+		if change != "ABORT" and change !="ACCEPT":
+			gc = 'TESTZ Z={}'.format(change)
+			print(gc)
+			self.sendGCode(gc)
+		else:
+			self.sendGCode(change)
 
 	def probe_calibrate(self):
+		print("probe_calibrate")
 		if self.ishomed() == False:
 			self.sendGCode('G28')
 		self.sendGCode('PROBE_CALIBRATE')
-		self.sendGCode('G1 Z0.0')
 
 	# ------------- OctoPrint Function ----------
 
@@ -442,7 +445,6 @@ class PrinterData:
 	def get_gcode_store(self, count=100):
 		gcode_store = None
 		try:
-			print("getREST")
 			gcode_store = self.getREST('/server/gcode_store?count=%d' % count)['result']['gcode_store']
 		except:
 			print("GCode store read failed!")
@@ -480,7 +482,6 @@ class PrinterData:
 			return []
 		
 		names = [fl["path"] for fl in sorted_files]
-		
 		return names
 
 	def update_variable(self):
@@ -653,7 +654,7 @@ class PrinterData:
 
 	def moveAbsolute(self, axis, position, speed):
 		self.sendGCode('%s \n%s %s%s F%s%s' % ('G90', 'G1', axis, position, speed,
-			'\nG91' if not self.absolute_moves else ''))
+			'\nG90'	if not self.absolute_moves else ''))
 
 	def sendGCode(self, gcode):
 		self.postREST('/printer/gcode/script', json={'script': gcode})
@@ -682,9 +683,6 @@ class PrinterData:
 	
 	def setBedTemp(self, target):
 		self.sendGCode('M140 S%s' % target)
-
-	def setPosition(self, pos ,target): 			# Add by Oren
-		self.sendGCode('G1 %s %s' % (pos, target))
 		
 	def preHeat(self, bedtemp, exttemp, toolnum=0):
 		self.setBedTemp(bedtemp)

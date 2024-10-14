@@ -327,7 +327,7 @@ class LCD:
     def format_console_data(self, msg, data_type):
         data = None
         if data_type == 'command':
-            data = "> " + msg
+            data = "> " + str(msg)
         elif data_type == 'response':
             if 'B:' in msg and 'T0:' in msg:
                 pass ## Filter out temperature responses
@@ -387,9 +387,8 @@ class LCD:
             self.write("premove.y_pos.txt=\"%d\"" % (data.y_pos))
         if data.z_pos != self.printer.z_pos:
             self.write("premove.z_pos.txt=\"%d\"" % (data.z_pos))
-
         if self.probe_mode and data.z_pos != self.printer.z_pos:
-            self.write("leveldata.z_offset.val=%d" % (int)(data.z_pos * 100))
+            self.write("probecali.z_pos.val=%d" % (int)(data.z_pos * 1000))
             #self.write("adjustzoffset.z_offset.val=%d" % (int)(data.z_pos * 100))
 
         #if self.speed_adjusting == 'PrintSpeed' and data.feedrate != self.printer.feedrate:
@@ -437,11 +436,11 @@ class LCD:
     def probe_mode_start(self):
         self.probe_mode = True
         self.z_offset_unit = 1
-        self.write("leveldata.z_offset.val=%d" % (int)(self.printer.z_pos * 100))
+        # self.write("probecali.z_pos.val=%d" % (self.printer.z_pos)*1000) # Annotation by Oren
         #self.write("adjustzoffset.z_offset.val=%d" % (int)(self.printer.z_pos * 100))
-        self.write("page leveldata_36")
-        self.write("leveling_36.tm0.en=0")
-        self.write("leveling.tm0.en=0")
+        # self.write("page leveldata_36")    # Annotation by Oren
+        # self.write("leveling_36.tm0.en=0") # Annotation by Oren
+        # self.write("leveling.tm0.en=0")    # Annotation by Oren
 
     def run(self):
         while self.running:
@@ -457,6 +456,8 @@ class LCD:
                         else:
                             self.rx_buf.clear()
                             print("Unexpected header received: 0x%02x ()" % incomingByte[0])         
+                    elif incomingByte[0] == 0x00:
+                            pass
                     else:
                         self.rx_buf.clear()
                         self.error_from_lcd = True
@@ -537,15 +538,16 @@ class LCD:
             files = self.callback(self.evt.FILES)
             self.files = files
             if (files):
+                self.write("page file1")
                 i = 0
                 for file in files:
                     page_num = ((i / 5) + 1)
-                    if page_num <= 5:
+                    if page_num <= 6:
                         self.write("file%d.t%d.txt=\"%s\"" % (page_num, i, file))
                     else:
                         pass
                     i += 1
-                self.write("page file1")
+
             else:
                 self.files = False
                 # Clear old files from LCD
@@ -875,13 +877,13 @@ class LCD:
     def _SettingScreen(self, data):
         if data[0] == 0x01:
             self.callback(self.evt.PROBE)
-            self.write("page autohome")
-            self.write("leveling.va1.val=1")
+            self.write("page probecali")
+            # self.write("page autohome")      # Annotation by Oren
+            # self.write("leveling.va1.val=1") # Annotation by Oren
 
         elif data[0] == 0x06: # Motor release
             self.callback(self.evt.MOTOR_OFF)
         elif data[0] == 0x07: # Fan Control
-            
             pass
         elif data[0] == 0x08: 
             print("What is this???")
@@ -924,9 +926,9 @@ class LCD:
                 unit = - self.z_offset_unit
             
             if self.probe_mode:
-                z_pos = self.printer.z_pos + unit
-                print("Probe: z_pos %d" % z_pos)
-                self.write("leveldata.z_offset.val=%d" % (int)(pos * 100))
+                z_offset = self.printer.z_pos + unit
+                print("Probe: z_pos %.3f" % z_offset)
+                self.write("probecali.z_pos.val=%d" % (int)(z_offset * 1000))
                 #self.write("adjustzoffset.z_offset.val=%d" % (int)(self.printer.z_pos * 100))
                 self.callback(self.evt.PROBE, unit)
             else:
@@ -936,17 +938,27 @@ class LCD:
                 self.callback(self.evt.Z_OFFSET, offset)
                 self.printer.z_offset = offset
         elif data[0] == 0x04:
-            self.z_offset_unit = 0.01
-            self.write("adjustzoffset.zoffset_value.val=1")
+            self.z_offset_unit = 1
+            # self.write("adjustzoffset.zoffset_value.val=1")
         elif data[0] == 0x05:
             self.z_offset_unit = 0.1
-            self.write("adjustzoffset.zoffset_value.val=2")
+            # self.write("adjustzoffset.zoffset_value.val=2")
         elif data[0] == 0x06:
-            self.z_offset_unit = 1
-            self.write("adjustzoffset.zoffset_value.val=3")
-        elif data[0] == 0x07: # LED 2 TODO: Where is LED2??
+            self.z_offset_unit = 0.05
+            # self.write("adjustzoffset.zoffset_value.val=3")
+        elif data[0] == 0x07:
+            self.z_offset_unit = 0.025
+            # self.write("adjustzoffset.zoffset_value.val=4")
+        elif data[0] == 0x08:
+            self.z_offset_unit = 0.01
+            # self.write("adjustzoffset.zoffset_value.val=5")
+        elif data[0] == 0x09:
+            self.callback(self.evt.PROBE,"ACCEPT")
+        elif data[0] == 0x0a:
+            self.callback(self.evt.PROBE,"ABORT")
+        elif data[0] == 0x0b: # LED 2 TODO: Where is LED2??
             print("Toggle led2!!????")
-        elif data[0] == 0x08: # Light control
+        elif data[0] == 0x0C: # Light control
             if self.light == True:
                 self.light = False
                 self.write("status_led2=0")
@@ -956,7 +968,7 @@ class LCD:
                 self.write("status_led2=1")
                 self.callback(self.evt.LIGHT, 128)
 
-        elif data[0] == 0x09: # Bed mesh leveling
+        elif data[0] == 0x0d: # Bed mesh leveling
             # Wait for heaters?
             self.callback(self.evt.PROBE_COMPLETE)
             self.write("page leveldata_36")
@@ -964,7 +976,7 @@ class LCD:
             self.write("leveling.tm0.en=0")
             #self.write("page warn_zoffset")
 
-        elif data[0] == 0x0a:
+        elif data[0] == 0x0e:
             #status = self.callback(self.evt.PRINT_STATUS)
             self.write("printpause.printspeed.txt=\"%d\"" % self.printer.feedrate)
             self.write("printpause.fanspeed.txt=\"%d\"" % self.printer.fan)
@@ -973,15 +985,15 @@ class LCD:
             self.write("printpause.printprocess.val=%d" % self.printer.percent)
             self.write("printpause.printvalue.txt=\"%d\"" % self.printer.percent)
 
-        elif data[0] == 0x0b:
+        elif data[0] == 0x0f:
             pass # Screen requesting nozzle and bed temp
-        elif data[0] == 0x0c:
+        elif data[0] == 0x10:
             pass
             #self.write(b'tm0.en=0')
             #self.write(b'va0.val=0')
             #self.write(b'tm1.en=1')
             #self.write(b'main.va0.val=1') #Plus:2 Pro:1 Max:3
-        elif data[0] == 0x16:
+        elif data[0] == 0x11:
             self.write("main.va0.val=1")
             self.write("printpause.t0.txt=\"%s\"" % self.printer.file_name)
             #status = self.callback(self.evt.PRINT_STATUS)
@@ -1108,13 +1120,13 @@ class LCD:
             print("_PrintFile: Not recognised %d" % data[0])
     
     def _SelectFile(self, data):
-        print(self.files)
+        # print(self.files) # Annotation by Oren
         if self.files and data[0] <= len(self.files):
             self.selected_file = (data[0] - 1) 
-            self.write("askprint.t0.txt=\"%s\"" % self.files[self.selected_file])
+            # self.write("askprint.t0.txt=\"%s\"" % self.files[self.selected_file]) # Annotation by Oren
             self.write("printpause.t0.txt=\"%s\"" % self.files[self.selected_file])
-            self.write("askprint.cp0.close()")
-            self.write("askprint.cp0.aph=0")
+            # self.write("askprint.cp0.close()")    # Annotation by Oren
+            # self.write("askprint.cp0.aph=0")  # Annotation by Oren
             self.write("page askprint")
             self.callback(self.evt.THUMBNAIL)
             self.askprint = True
