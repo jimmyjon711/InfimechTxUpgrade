@@ -1,3 +1,5 @@
+#Ver 1.2.5
+
 import binascii
 from time import sleep
 from threading import Thread
@@ -102,6 +104,8 @@ class LCDEvents():
     POSITION_X       = 33  # Add by Oren
     POSITION_Y       = 34  # Add by Oren
     POSITION_Z       = 35  # Add by Oren
+    Z_TILT           = 36  # Add by Oren
+    SCREWS_TILT      = 37  # Add by Oren
 
 
 class LCD:
@@ -273,7 +277,7 @@ class LCD:
                 color16.append(rgb)
 
         output_data = bytearray(height * width * 10)
-        # result_int = lib_col_pic.ColPic_EncodeStr(color16, width, height, output_data, width * height * 10, 1024)
+        result_int = lib_col_pic.ColPic_EncodeStr(color16, width, height, output_data, width * height * 10, 1024)
 
         each_max = 512
         j = 0
@@ -295,8 +299,7 @@ class LCD:
 
             # Clear screen
             self.clear_thumbnail()   
-
-            sleep(0.2)
+            sleep(1)
 
             for bytes in result:
                 self.write("printpause.cp0.aph=0")
@@ -307,7 +310,7 @@ class LCD:
                 self.write("\"")
 
                 self.write(("printpause.va1.txt+=printpause.va0.txt"))
-                sleep(0.02)
+                sleep(0.05)
 
             sleep(0.2)
             self.write("printpause.cp0.aph=127")
@@ -315,9 +318,9 @@ class LCD:
             self.is_thumbnail_written = True
             print("Write thumbnail to LCD done!")
         
-        if self.askprint == True:
-            self.write("askprint.cp0.aph=127")
-            self.write("askprint.cp0.write(printpause.va1.txt)")            
+        # if self.askprint == True: # Annotation by Oren
+        #     self.write("askprint.cp0.aph=127") #Annotation by Oren
+        #     self.write("askprint.cp0.write(printpause.va1.txt)") #Annotation by Oren            
    
     def clear_console(self):
         self.write("console.buf.txt=\"\"")
@@ -538,15 +541,16 @@ class LCD:
             files = self.callback(self.evt.FILES)
             self.files = files
             if (files):
-                self.write("page file1")
                 i = 0
                 for file in files:
+                    sleep(0.03)
                     page_num = ((i / 5) + 1)
-                    if page_num <= 6:
+                    if page_num < 6:
                         self.write("file%d.t%d.txt=\"%s\"" % (page_num, i, file))
                     else:
                         pass
                     i += 1
+                self.write("page file1")
 
             else:
                 self.files = False
@@ -557,7 +561,7 @@ class LCD:
                 self.write("page nosdcard")
 
         elif data[0] == 2: # Abort print
-            print("Abort print not supported") #TODO: 
+            print("Abort print not supported") #TODO:
         else:
             print("_MainPage: %d not supported" % data[0])
     
@@ -683,9 +687,19 @@ class LCD:
             self.accel_unit = 50
         elif data[0] == 0x07: # Move 10mm / 10C /10%
             self.temp_unit = 10
-            self.speed_unit = 100
+            self.speed_unit = 200
             self.move_unit = 10
             self.accel_unit = 3000
+        elif data[0] == 0x15: # Move 25mm / 10C /10% # Add by Oren
+            # self.temp_unit = 10
+            self.speed_unit = 200
+            self.move_unit = 25
+            self.accel_unit = 5000
+        elif data[0] == 0x16: # Move 50mm / 10C /10% # Add by Oren
+            self.temp_unit = 10
+            self.speed_unit = 200
+            self.move_unit = 50
+            self.accel_unit = 7500
         elif data[0] == 0x08: # + temp
             if self.adjusting == 'Hotend':
                 self.printer.hotend_target += self.temp_unit
@@ -937,36 +951,34 @@ class LCD:
                 self.write("adjustzoffset.z_offset.val=%d" % (int)(offset * 100))
                 self.callback(self.evt.Z_OFFSET, offset)
                 self.printer.z_offset = offset
-        elif data[0] == 0x04:
+        elif data[0] == 0x04:   # Add by Oren
             self.z_offset_unit = 1
             # self.write("adjustzoffset.zoffset_value.val=1")
-        elif data[0] == 0x05:
+        elif data[0] == 0x05:   # Add by Oren
             self.z_offset_unit = 0.1
             # self.write("adjustzoffset.zoffset_value.val=2")
-        elif data[0] == 0x06:
+        elif data[0] == 0x06:   # Add by Oren
             self.z_offset_unit = 0.05
             # self.write("adjustzoffset.zoffset_value.val=3")
-        elif data[0] == 0x07:
+        elif data[0] == 0x07:   # Add by Oren
             self.z_offset_unit = 0.025
             # self.write("adjustzoffset.zoffset_value.val=4")
-        elif data[0] == 0x08:
+        elif data[0] == 0x08:   # Add by Oren
             self.z_offset_unit = 0.01
             # self.write("adjustzoffset.zoffset_value.val=5")
-        elif data[0] == 0x09:
+        elif data[0] == 0x09:   # Add by Oren
             self.callback(self.evt.PROBE,"ACCEPT")
-        elif data[0] == 0x0a:
+        elif data[0] == 0x0a:   # Add by Oren
             self.callback(self.evt.PROBE,"ABORT")
         elif data[0] == 0x0b: # LED 2 TODO: Where is LED2??
             print("Toggle led2!!????")
         elif data[0] == 0x0C: # Light control
             if self.light == True:
                 self.light = False
-                self.write("status_led2=0")
-                self.callback(self.evt.LIGHT, 0)
+                self.callback(self.evt.LIGHT, "close_led")
             else:
                 self.light = True
-                self.write("status_led2=1")
-                self.callback(self.evt.LIGHT, 128)
+                self.callback(self.evt.LIGHT, "open_led")
 
         elif data[0] == 0x0d: # Bed mesh leveling
             # Wait for heaters?
@@ -999,17 +1011,23 @@ class LCD:
             #status = self.callback(self.evt.PRINT_STATUS)
             self.write("printpause.printprocess.val=%d" % self.printer.percent)
             self.write("printpause.printvalue.txt=\"%d\"" % self.printer.percent)
+        elif data[0] == 0x12:   # Add by Oren
+            self.callback(self.evt.Z_TILT)
+        elif data[0] == 0x13:   # Add by Oren
+            self.callback(self.evt.SCREWS_TILT)
         else:
             print("_BedLevelFun: Data not recognised %d" % data[0])
     
     def _AxisPageSelect(self, data):
         if data[0] == 0x04: #Home all
             self.callback(self.evt.HOME, 'X Y Z')
-        elif data[0] == 0x05: #Home X
+        elif data[0] == 0x05: #Home X Y
+            self.callback(self.evt.HOME, 'X Y')
+        elif data[0] == 0x06: #Home X
             self.callback(self.evt.HOME, 'X')
-        elif data[0] == 0x06: #Home Y
+        elif data[0] == 0x07: #Home Y
             self.callback(self.evt.HOME, 'Y')
-        elif data[0] == 0x07: #Home Z
+        elif data[0] == 0x08: #Home Z
             self.callback(self.evt.HOME, 'Z')
         else:
             print("_AxisPageSelect: Data not recognised %d" % data[0])
@@ -1123,7 +1141,7 @@ class LCD:
         # print(self.files) # Annotation by Oren
         if self.files and data[0] <= len(self.files):
             self.selected_file = (data[0] - 1) 
-            # self.write("askprint.t0.txt=\"%s\"" % self.files[self.selected_file]) # Annotation by Oren
+            self.write("askprint.t0.txt=\"%s\"" % self.files[self.selected_file]) # Annotation by Oren
             self.write("printpause.t0.txt=\"%s\"" % self.files[self.selected_file])
             # self.write("askprint.cp0.close()")    # Annotation by Oren
             # self.write("askprint.cp0.aph=0")  # Annotation by Oren

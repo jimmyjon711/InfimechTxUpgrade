@@ -1,3 +1,5 @@
+#Ver 1.2.5
+
 import getopt
 import sys
 import time
@@ -24,10 +26,10 @@ class KlipperLCD ():
 
         self.printer.init_Webservices()
         gcode_store = self.printer.get_gcode_store()
-        # self.lcd.write_gcode_store(gcode_store) #Annotation by Oren
+        self.lcd.write_gcode_store(gcode_store) #Annotation by Oren
 
         macros = self.printer.get_macros()
-        # self.lcd.write_macros(macros) #Annotation by Oren
+        self.lcd.write_macros(macros) #Annotation by Oren
 
         print(self.printer.MACHINE_SIZE)
         print(self.printer.SHORT_BUILD_VERSION)
@@ -42,7 +44,9 @@ class KlipperLCD ():
         Thread(target=self.periodic_update).start()
 
     def periodic_update(self):
+
         while self.running:
+            self.printer.update_variable()
             if self.wait_probe:
                 print("Zpos=%f, Zoff=%f" % (self.printer.current_position.z, self.printer.BABY_Z_VAR))
                 if self.printer.ishomed():
@@ -50,7 +54,6 @@ class KlipperLCD ():
                         print("IsHomed")
                         self.lcd.probe_mode_start()
 
-            self.printer.update_variable()
             data = _printerData()
             data.hotend_target = self.printer.thermalManager['temp_hotend'][0]['target']
             data.hotend        = self.printer.thermalManager['temp_hotend'][0]['celsius']
@@ -70,7 +73,7 @@ class KlipperLCD ():
             data.file_name     = self.printer.file_name
             data.max_velocity           = self.printer.max_velocity          
             data.max_accel              = self.printer.max_accel             
-            data.minimum_cruise_ratio     = self.printer.minimum_cruise_ratio    
+            data.minimum_cruise_ratio   = self.printer.minimum_cruise_ratio    
             data.square_corner_velocity = self.printer.square_corner_velocity
 
             self.lcd.data_update(data)
@@ -125,7 +128,7 @@ class KlipperLCD ():
                 img = base64.b64decode(b64)        
                 
                 # Write thumbnail to LCD
-                #self.lcd.write_thumbnail(img)
+                self.lcd.write_thumbnail(img)
             else:
                 self.lcd.clear_thumbnail()
                 print("Aborting thumbnail, no image found")
@@ -193,6 +196,10 @@ class KlipperLCD ():
                 self.wait_probe = True
             else:
                 self.printer.probe_adjust(data)
+        elif evt == self.lcd.evt.Z_TILT:
+            self.printer.z_tilt()
+        elif evt == self.lcd.evt.SCREWS_TILT:
+            self.printer.screws_tilt()
         elif evt == self.lcd.evt.PROBE_COMPLETE:
             self.wait_probe = False
             print("Save settings!")

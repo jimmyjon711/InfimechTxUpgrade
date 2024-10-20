@@ -1,15 +1,18 @@
-from asyncio.tasks import sleep
-import threading
+#Ver 1.2.5
+
+import asyncio
+import atexit
 import errno
+import threading
 import select
 import socket
 import json
+import time
+from asyncio.tasks import sleep
+from json import JSONDecodeError
+
 import requests
 from requests.exceptions import ConnectionError
-import atexit
-import time
-import asyncio
-
 class xyze_t:
 	x = 0.0
 	y = 0.0
@@ -56,7 +59,7 @@ class HMI_value_t:
 	Move_Z_scale = 0.0
 	Move_E_scale = 0.0
 	offset_value = 0.0
-	show_mode = 0  # -1: Temperature control    0: Printing temperature
+	show_mode = 0  # -1: Temperature control	0: Printing temperature
 
 class HMI_Flag_t:
 	language = 0
@@ -181,8 +184,6 @@ class MoonrakerSocket:
 			'Content-Type': 'application/json'
 		})
 		self.base_address = 'http://' + address + ':' + str(port)
-
-
 class PrinterData:
 	event_loop = None
 	HAS_HOTEND = True
@@ -232,30 +233,30 @@ class PrinterData:
 
 	def __init__(self, API_Key, URL='127.0.0.1', klippy_sock='/home/pi/printer_data/comms/klippy.sock', callback=None):
 		self.response_callback = callback
-		self.klippy_sock      = klippy_sock
-		self.BABY_Z_VAR       = 0
-		self.print_speed      = 100
-		self.flow_percentage  = 100
-		self.led_percentage   = 0
-		self.temphot          = 0
-		self.tempbed          = 0
-		self.HMI_ValueStruct  = HMI_value_t()
-		self.HMI_flag         = HMI_Flag_t()
+		self.klippy_sock = klippy_sock
+		self.BABY_Z_VAR	= 0
+		self.print_speed = 100
+		self.flow_percentage = 100
+		self.led_percentage = 0
+		self.temphot = 0
+		self.tempbed = 0
+		self.HMI_ValueStruct = HMI_value_t()
+		self.HMI_flag = HMI_Flag_t()
 		self.current_position = xyze_t()
-		self.gcm              = None
-		self.z_offset         = 0
-		self.thermalManager   = {
+		self.gcm = None
+		self.z_offset = 0
+		self.thermalManager = {
 			'temp_bed': {'celsius': 20, 'target': 120},
 			'temp_hotend': [{'celsius': 20, 'target': 120}],
 			'fan_speed': [100]
 		}
-		self.job_Info               = None
-		self.file_path              = None
-		self.file_name              = None
-		self.status                 = None
-		self.max_velocity           = None
-		self.max_accel              = None
-		self.minimum_cruise_ratio   = None
+		self.job_Info = None
+		self.file_path = None
+		self.file_name = None
+		self.status = None
+		self.max_velocity = None
+		self.max_accel = None
+		self.minimum_cruise_ratio = None
 		self.square_corner_velocity = None
 		
 		self.op = MoonrakerSocket(URL, 80, API_Key)
@@ -391,6 +392,14 @@ class PrinterData:
 		if self.ishomed() == False:
 			self.sendGCode('G28')
 		self.sendGCode('PROBE_CALIBRATE')
+	
+	def z_tilt(self):
+		print("z_tile_adjust")
+		self.sendGCode('Z_TILT_ADJUST')
+
+	def screws_tilt(self):
+		print("screws_tilt_calculate")
+		self.sendGCode("SCREWS_TILT_CALCULATE")
 
 	# ------------- OctoPrint Function ----------
 
@@ -437,9 +446,9 @@ class PrinterData:
 		)
 		self.X_MAX_POS = int(volume[0])
 		self.Y_MAX_POS = int(volume[1])
-		self.max_velocity           = toolhead['max_velocity']
-		self.max_accel              = toolhead['max_accel']
-		self.minimum_cruise_ratio     = toolhead['minimum_cruise_ratio']
+		self.max_velocity		   = toolhead['max_velocity']
+		self.max_accel			  = toolhead['max_accel']
+		self.minimum_cruise_ratio	 = toolhead['minimum_cruise_ratio']
 		self.square_corner_velocity = toolhead['square_corner_velocity']
 
 	def get_gcode_store(self, count=100):
@@ -612,12 +621,11 @@ class PrinterData:
 	
 	def firmware_restart(self): #fixed (Add by Oren)
 		print('Firmware_restart')
-		self.postREST('/printer/firmware_restart', json=None)
+		self.postREST('/printer/firmware_restart', json='method')
 	
 	def host_restart(self): #fixed (Add by Oren)
 		print('Host restart')
 		self.postREST('/printer/restart', json=None)
-
 
 	def set_print_speed(self, fr):
 		self.print_speed = fr
@@ -627,12 +635,9 @@ class PrinterData:
 		self.flow_percentage = fl
 		self.sendGCode('M221 S%d' % fl)
 
-	def set_led(self, led):
-		self.led_percentage = led
-		if(led > 0):
-			self.sendGCode('SET_LED LED=top_LEDs WHITE=0.5 SYNC=0 TRANSMIT=1')
-		else:
-			self.sendGCode('SET_LED LED=top_LEDs WHITE=0 SYNC=0 TRANSMIT=1')
+	def set_led(self, command):
+		print(command)
+		self.sendGCode(command)
 
 	def set_fan(self, fan):
 		self.fan_percentage = fan
@@ -640,13 +645,15 @@ class PrinterData:
 
 	def home(self, axis): #fixed using gcode
 		GCode = 'G28 '
-		if axis == 'X' or axis == 'Y' or axis == 'Z' or axis == 'X Y Z':
+		if axis == 'X' or axis == 'Y' or axis == 'Z' or axis == 'X Y':
 			GCode += axis
+			self.sendGCode(GCode)
+		elif axis == 'X Y Z':
+			self.sendGCode('G28')
 		else:
 			print("home: parameter not recognised" + axis)
 			return
 
-		self.sendGCode(GCode)
 
 	def moveRelative(self, axis, distance, speed):
 		self.sendGCode('%s \n%s %s%s F%s%s' % ('G91', 'G1', axis, distance, speed,
