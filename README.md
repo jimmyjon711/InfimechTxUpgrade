@@ -203,7 +203,7 @@ This process assumes that you have already run the InfimechTXUpgrade.sh file fro
     ```
     cp ~/klipper/out/klipper.bin ~/printer_data/config/mks_skipr_mini.bin
     ```
-1. Go to your printer's web interface and download the msk_skipr_mini.bin file
+1. Go to your printer's web interface and download the mks_skipr_mini.bin file
 1. Copy the file you downloaded to a microSD card.
 1. Properly shutdown the Infimech and power it off then insert the microSD card into the sd-card slot.
     - This slot is located on the mainboard, and is accessible without taking the bottom off. There is an opening on the side that you can sneak the card in if you could see it properly. (But be careful, if you drop it then you are taking the bottom off to retrieve the sd-card)
