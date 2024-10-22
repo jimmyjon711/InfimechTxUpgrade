@@ -1,4 +1,4 @@
-#Ver 1.2.5
+#Version 1.2.6
 
 import getopt
 import sys
@@ -53,7 +53,8 @@ class KlipperLCD ():
                         self.wait_probe = False
                         print("IsHomed")
                         self.lcd.probe_mode_start()
-
+            if self.printer.mcu_state == False:
+                self.lcd.write("page shutdown")
             data = _printerData()
             data.hotend_target = self.printer.thermalManager['temp_hotend'][0]['target']
             data.hotend        = self.printer.thermalManager['temp_hotend'][0]['celsius']

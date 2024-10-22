@@ -1,4 +1,4 @@
-#Ver 1.2.5
+#Version 1.2.6
 
 import asyncio
 import atexit
@@ -258,6 +258,7 @@ class PrinterData:
 		self.max_accel = None
 		self.minimum_cruise_ratio = None
 		self.square_corner_velocity = None
+		self.mcu_state = False
 		
 		self.op = MoonrakerSocket(URL, 80, API_Key)
 		print(self.op.base_address)
@@ -309,6 +310,7 @@ class PrinterData:
 						pass ## Filter out temperature responses
 					else:
 						self.response_callback(resp, 'response')
+
 
 		if status:
 			if 'toolhead' in status:
@@ -498,16 +500,27 @@ class PrinterData:
 			self.ks.klippyExit()
 			self.klippy_start()
 			return False
+		
+		query = '/printer/info'
+		try:
+			mcu_state = self.getREST(query)['result']['state']
+			if mcu_state == 'shutdown':
+				self.mcu_state = False
+			elif mcu_state == 'ready':
+				self.mcu_state = True
+		except:
+			pass
+
 		query = '/printer/objects/query?extruder&heater_bed&gcode_move&fan&print_stats&motion_report&toolhead'
 		try:
 			data = self.getREST(query)['result']['status']
 		except:
 			print("Exception 431")
 			return False
+		
 
 		#print("update_variable:")
 		#print(json.dumps(data, indent=2))
-
 		self.gcm = data['gcode_move']
 		self.z_offset = self.gcm['homing_origin'][2] #z offset
 		self.flow_percentage = self.gcm['extrude_factor'] * 100 #flow rate percent
@@ -565,6 +578,7 @@ class PrinterData:
 			self.file_name = self.job_Info['print_stats']['filename']
 			self.status = self.job_Info['print_stats']['state']
 			self.HMI_flag.print_finish = self.getPercent() == 100.0
+		
 		return Update
 
 	def getState(self):
@@ -621,11 +635,13 @@ class PrinterData:
 	
 	def firmware_restart(self): #fixed (Add by Oren)
 		print('Firmware_restart')
-		self.postREST('/printer/firmware_restart', json='method')
-	
+		self.postREST('/printer/firmware_restart', json=None)
+		self.mcu_state = True
+
 	def host_restart(self): #fixed (Add by Oren)
 		print('Host restart')
 		self.postREST('/printer/restart', json=None)
+		self.mcu_state = True
 
 	def set_print_speed(self, fr):
 		self.print_speed = fr

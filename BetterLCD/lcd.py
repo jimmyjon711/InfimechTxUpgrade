@@ -1,4 +1,4 @@
-#Ver 1.2.5
+#Version 1.2.6
 
 import binascii
 from time import sleep
@@ -258,8 +258,8 @@ class LCD:
         # Open as image
         im = Image.open(BytesIO(img))
         width, height = im.size
-        if width != 145 or height != 145:
-            im = im.resize((145, 145))
+        if width != 190 or height != 190:
+            im = im.resize((190, 190))
             width, height = im.size
 
         pixels = im.load()
@@ -273,7 +273,7 @@ class LCD:
                 b = b >> 3
                 rgb = (r << 11) | (g << 5) | b
                 if rgb == 0x0000:
-                    rgb = 0xE73D
+                    rgb = 0x52AA
                 color16.append(rgb)
 
         output_data = bytearray(height * width * 10)
