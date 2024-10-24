@@ -1,4 +1,4 @@
-#Version 1.2.6
+#Version 1.3.2
 
 import getopt
 import sys
@@ -76,6 +76,7 @@ class KlipperLCD ():
             data.max_accel              = self.printer.max_accel             
             data.minimum_cruise_ratio   = self.printer.minimum_cruise_ratio    
             data.square_corner_velocity = self.printer.square_corner_velocity
+            data.local_time_display     =  self.printer.getlocaltime() # Add by Oren
 
             self.lcd.data_update(data)
                 

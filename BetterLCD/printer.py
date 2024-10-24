@@ -1,4 +1,4 @@
-#Version 1.2.6
+#Version 1.3.2
 
 import asyncio
 import atexit
@@ -483,16 +483,12 @@ class PrinterData:
 		if not self.files or refresh:
 			try:
 				self.files = self.getREST('/server/files/list')["result"]
+				self.sorted_files = sorted(self.files, key=lambda fl: fl.get("modified", 0), reverse=True)
 			except:
 				print("Exception 418")
 				return[]
-		try:
-			sorted_files = sorted(self.files, key=lambda fl: fl.get("modified", 0), reverse=True)
-		except KeyError:
-			print("KeyError: 'modified' field not found in some files.")
-			return []
 		
-		names = [fl["path"] for fl in sorted_files]
+		names = [fl["path"] for fl in self.sorted_files]
 		return names
 
 	def update_variable(self):
@@ -598,6 +594,11 @@ class PrinterData:
 			if self.job_Info['virtual_sdcard']['is_active']:
 				return self.job_Info['virtual_sdcard']['progress'] * 100
 		return 0
+	
+	def getlocaltime(self):
+		localtime = time.localtime()
+		result = time.strftime("%I:%M", localtime)
+		return result
 
 	def duration(self):
 		if self.job_Info:
@@ -614,7 +615,7 @@ class PrinterData:
 		return 0
 
 	def openAndPrintFile(self, filenum):
-		self.file_name = self.files[filenum]['path']
+		self.file_name = self.sorted_files[filenum]['path']
 		self.postREST('/printer/print/start', json={'filename': self.file_name})
 
 	def cancel_job(self): #fixed
