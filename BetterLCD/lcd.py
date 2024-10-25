@@ -1,4 +1,4 @@
-#Version 1.3.2
+#Version 1.3.3
 
 import binascii
 from time import sleep
@@ -955,7 +955,7 @@ class LCD:
             else:
                 offset += unit
                 #self.write("leveldata.z_offset.val=%d" % (int)(offset * 100))
-                self.write("adjustzoffset.z_offset.val=%d" % (int)(offset * 100))
+                self.write("adjustzoffset.z_offset.val=%d" % (int)(offset * 1000))
                 self.callback(self.evt.Z_OFFSET, offset)
                 self.printer.z_offset = offset
         elif data[0] == 0x04:   # Add by Oren
@@ -999,7 +999,7 @@ class LCD:
             #status = self.callback(self.evt.PRINT_STATUS)
             self.write("printpause.printspeed.txt=\"%d\"" % self.printer.feedrate)
             self.write("printpause.fanspeed.txt=\"%d\"" % self.printer.fan)
-            self.write("printpause.zvalue.val=%d" % (int)(self.printer.z_pos*10))
+            self.write("printpause.zvalue.val=%d" % (int)(self.printer.z_pos*100))
             self.write("printpause.printtime.txt=\"%d h %d min\"" % (self.printer.remaining/3600,(self.printer.remaining % 3600)/60))
             self.write("printpause.printprocess.val=%d" % self.printer.percent)
             self.write("printpause.printvalue.txt=\"%d\"" % self.printer.percent)
@@ -1125,7 +1125,7 @@ class LCD:
             #self.write("leveldata.z_offset.val=%d" % 0)
             self.write("printpause.printvalue.txt=\"0\"")
             self.write("printpause.printprocess.val=0")
-            self.write("leveldata.z_offset.val=%d" % (int)(self.printer.z_offset * 100))
+            self.write("leveldata.z_offset.val=%d" % (int)(self.printer.z_offset * 1000))
             self.write("page printpause")
             self.write("printpause.p1.pic=22")
             self.write("restFlag2=1")
