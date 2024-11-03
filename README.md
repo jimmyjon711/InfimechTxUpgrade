@@ -76,7 +76,7 @@ Linux
     ```
 1. Run script 
     ```
-    ~\infimechTxUpgrade.sh
+    ~/infimechTxUpgrade.sh
     ```
 1. Either run all with `a` or choose each step in order from `1-8`
 1. See sections with prompted with input
