@@ -1,5 +1,8 @@
 # Updating Infimech TX 3D Printer from Klipper 10 to Klipper 12
 
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/jimmyjon711/InfimechTxUpgrade/blob/main/README.md)
+[![ru](https://img.shields.io/badge/lang-ru-yellow.svg)](https://github.com/jimmyjon711/InfimechTxUpgrade/blob/main/README.ru.md)
+
 Guide/script still a work in progress but its good enough to upgrade to klipper 12. My end goal is to figure out what services are not needed(yes I think there are some) and remove the un-necessary clutter in the MKS user folder.
 
 # Disclaimer
@@ -12,7 +15,7 @@ Guide/script still a work in progress but its good enough to upgrade to klipper 
 - Webcamd and touch screen still work like normal
 - Recompiles RPI mcu
 - Fixes sources.list fist so that you can update(only to what is in the archive area) and apply security patches.
-    - Future work to compile Armbian 24 and get this working corectly.... TBD
+    - Future work to compile Armbian 24 and get this working correctly.... TBD
 
 ## What this script does not do
 - Install script does not update the STM32 microcontroller to klipper 12 automatically, updating the microcontroller will be a manual process that is documented at the end of this [document](#manually-updating-microcontroller)
@@ -199,7 +202,7 @@ This process assumes that you have already run the InfimechTXUpgrade.sh file fro
     KIAUH will now compile your firmware:
 
 1. Type `B` and hit enter to go back, then type `Q` and hit enter to quit KIAUH.
-1. Enter the following command to rename and and copy the file so you can download it from fluidd:
+1. Enter the following command to rename and copy the file so you can download it from fluidd:
     ```
     cp ~/klipper/out/klipper.bin ~/printer_data/config/mks_skipr_mini.bin
     ```
